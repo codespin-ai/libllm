@@ -1,4 +1,4 @@
-import * as openAI from "./api/openai.js";
+import * as openai from "./api/openai.js";
 import * as anthropic from "./api/anthropic.js";
 import { CompletionOptions } from "./CompletionOptions.js";
 import { CompletionResult } from "./CompletionResult.js";
@@ -22,15 +22,15 @@ export type LLMAPI = {
 };
 
 export type ConfigLoaders = {
-  openAI: () => Promise<openAI.OpenAIConfig>;
+  openai: () => Promise<openai.OpenAIConfig>;
   anthropic: () => Promise<anthropic.AnthropicConfig>;
 };
 
 export function getAPI(name: string, configLoaders: ConfigLoaders): LLMAPI {
   if (name === "openai") {
-    return openAI.getAPI(configLoaders.openAI);
+    return openai.getAPI(configLoaders.openai);
   } else if (name === "anthropic") {
-    return openAI.getAPI(configLoaders.anthropic);
+    return openai.getAPI(configLoaders.anthropic);
   } else {
     throw new InvalidProviderError();
   }
