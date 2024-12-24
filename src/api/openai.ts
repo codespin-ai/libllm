@@ -1,15 +1,15 @@
 import OpenAI, {
   AuthenticationError as OpenAIAuthenticationError,
 } from "openai";
-import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
-import { CompletionContentPart, CompletionInputMessage } from "../../types.js";
-import { CompletionOptions } from "../../CompletionOptions.js";
-import { CompletionResult } from "../../CompletionResult.js";
+import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
+import { CompletionContentPart, CompletionInputMessage } from "../types.js";
+import { CompletionOptions } from "../CompletionOptions.js";
+import { CompletionResult } from "../CompletionResult.js";
 import {
   ClientInitializationError,
   InvalidCredentialsError,
-} from "../../errors.js";
-import { writeDebug } from "../../console.js";
+} from "../errors.js";
+import { writeDebug } from "../console.js";
 
 export type OpenAIConfig = {
   apiKey: string;

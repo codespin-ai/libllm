@@ -1,15 +1,15 @@
 import Anthropic, {
   AuthenticationError as AnthropicAuthenticationError,
 } from "@anthropic-ai/sdk";
-import { CompletionOptions } from "../../CompletionOptions.js";
-import { CompletionResult } from "../../CompletionResult.js";
-import { CompletionInputMessage, CompletionContentPart } from "../../types.js";
-import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
+import { CompletionOptions } from "../CompletionOptions.js";
+import { CompletionResult } from "../CompletionResult.js";
+import { CompletionInputMessage, CompletionContentPart } from "../types.js";
+import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
 import {
   InvalidCredentialsError,
   MissingAnthropicEnvVarError,
-} from "../../errors.js";
-import { writeDebug } from "../../console.js";
+} from "../errors.js";
+import { writeDebug } from "../console.js";
 
 export type AnthropicConfig = {
   apiKey: string;

@@ -1,5 +1,5 @@
-import * as openAI from "./api/openai/completion.js";
-import * as anthropic from "./api/anthropic/completion.js";
+import * as openAI from "./api/openai.js";
+import * as anthropic from "./api/anthropic.js";
 import { CompletionOptions } from "./CompletionOptions.js";
 import { CompletionResult } from "./CompletionResult.js";
 import { InvalidProviderError } from "./errors.js";
@@ -8,6 +8,8 @@ export { extractFromMarkdownCodeBlock } from "./responseParsing/codeBlocks.js";
 export { fileBlockParser } from "./responseParsing/fileBlockParser.js";
 export { createStreamingFileParser } from "./responseParsing/streamingFileParser.js";
 export * from "./types.js";
+export { OpenAIConfig } from "./api/openai.js";
+export { AnthropicConfig } from "./api/anthropic.js";
 
 export type CompletionFunc = (
   messages: CompletionInputMessage[],
