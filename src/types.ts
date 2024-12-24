@@ -39,3 +39,5 @@ export type CompletionInputMessage =
   | CompletionAssistantMessage;
 
 export type ParseFunc = (response: string) => Promise<FileContent[]>;
+
+export type ResponseParsers = "file-block";
