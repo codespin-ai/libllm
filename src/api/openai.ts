@@ -9,7 +9,7 @@ import {
   ClientInitializationError,
   InvalidCredentialsError,
 } from "../errors.js";
-import { writeDebug } from "../console.js";
+import { getLogger } from "../logger.js";
 
 export type OpenAIConfig = {
   apiKey: string;
@@ -65,8 +65,11 @@ export function getAPI(configLoader: () => Promise<OpenAIConfig>) {
   async function completion(
     messages: CompletionInputMessage[],
     options: CompletionOptions,
+    isDebug?: boolean,
     reloadConfig?: boolean
   ): Promise<CompletionResult> {
+    const logger = getLogger(isDebug);
+
     if (!config || reloadConfig) {
       config = await configLoader();
       const apiKey = (process.env as any).ANTHROPIC_API_KEY ?? config?.apiKey;
@@ -77,10 +80,12 @@ export function getAPI(configLoader: () => Promise<OpenAIConfig>) {
       throw new ClientInitializationError("OPENAI");
     }
 
-    writeDebug(`OPENAI: model=${options.model.alias ?? options.model.name}`);
+    logger.writeDebug(
+      `OPENAI: model=${options.model.alias ?? options.model.name}`
+    );
     const maxTokens = options.maxTokens ?? options.model.maxOutputTokens;
     if (maxTokens) {
-      writeDebug(`OPENAI: maxTokens=${maxTokens}`);
+      logger.writeDebug(`OPENAI: maxTokens=${maxTokens}`);
     }
 
     const transformedMessages = convertMessagesToOpenAIFormat(messages);
@@ -131,8 +136,8 @@ export function getAPI(configLoader: () => Promise<OpenAIConfig>) {
       }
     }
 
-    writeDebug("---OPENAI RESPONSE---");
-    writeDebug(responseText);
+    logger.writeDebug("---OPENAI RESPONSE---");
+    logger.writeDebug(responseText);
 
     return {
       message: responseText,
