@@ -7,6 +7,7 @@ import { CompletionInputMessage } from "./types.js";
 export { extractFromMarkdownCodeBlock } from "./responseParsing/codeBlocks.js";
 export { fileBlockParser } from "./responseParsing/fileBlockParser.js";
 export { createStreamingFileParser } from "./responseParsing/streamingFileParser.js";
+export * from "./types.js";
 
 export type CompletionFunc = (
   messages: CompletionInputMessage[],
@@ -23,10 +24,7 @@ export type ConfigLoaders = {
   anthropic: () => Promise<anthropic.AnthropicConfig>;
 };
 
-export function getAPI(
-  name: string,
-  configLoaders: ConfigLoaders
-): LLMAPI {
+export function getAPI(name: string, configLoaders: ConfigLoaders): LLMAPI {
   if (name === "openai") {
     return openAI.getAPI(configLoaders.openAI);
   } else if (name === "anthropic") {
