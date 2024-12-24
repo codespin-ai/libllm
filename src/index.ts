@@ -23,7 +23,7 @@ export type ConfigLoaders = {
   anthropic: () => Promise<anthropic.AnthropicConfig>;
 };
 
-export function getCompletionAPI(
+export function getAPI(
   name: string,
   configLoaders: ConfigLoaders
 ): LLMAPI {
