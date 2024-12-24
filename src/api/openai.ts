@@ -2,14 +2,17 @@ import OpenAI, {
   AuthenticationError as OpenAIAuthenticationError,
 } from "openai";
 import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
-import { CompletionContentPart, CompletionInputMessage } from "../types.js";
+import {
+  CompletionContentPart,
+  CompletionInputMessage,
+  Logger,
+} from "../types.js";
 import { CompletionOptions } from "../CompletionOptions.js";
 import { CompletionResult } from "../CompletionResult.js";
 import {
   ClientInitializationError,
   InvalidCredentialsError,
 } from "../errors.js";
-import { getLogger } from "../logger.js";
 
 export type OpenAIConfig = {
   apiKey: string;
@@ -58,18 +61,18 @@ function convertMessagesToOpenAIFormat(
   });
 }
 
-export function getAPI(configLoader: () => Promise<OpenAIConfig>) {
+export function getAPI(
+  configLoader: () => Promise<OpenAIConfig>,
+  logger?: Logger
+) {
   let config: OpenAIConfig | undefined;
   let openaiClient: OpenAI | undefined = undefined;
 
   async function completion(
     messages: CompletionInputMessage[],
     options: CompletionOptions,
-    isDebug?: boolean,
     reloadConfig?: boolean
   ): Promise<CompletionResult> {
-    const logger = getLogger(isDebug);
-
     if (!config || reloadConfig) {
       config = await configLoader();
       const apiKey = (process.env as any).ANTHROPIC_API_KEY ?? config?.apiKey;
@@ -80,12 +83,12 @@ export function getAPI(configLoader: () => Promise<OpenAIConfig>) {
       throw new ClientInitializationError("OPENAI");
     }
 
-    logger.writeDebug(
+    logger?.writeDebug(
       `OPENAI: model=${options.model.alias ?? options.model.name}`
     );
     const maxTokens = options.maxTokens ?? options.model.maxOutputTokens;
     if (maxTokens) {
-      logger.writeDebug(`OPENAI: maxTokens=${maxTokens}`);
+      logger?.writeDebug(`OPENAI: maxTokens=${maxTokens}`);
     }
 
     const transformedMessages = convertMessagesToOpenAIFormat(messages);
@@ -136,8 +139,8 @@ export function getAPI(configLoader: () => Promise<OpenAIConfig>) {
       }
     }
 
-    logger.writeDebug("---OPENAI RESPONSE---");
-    logger.writeDebug(responseText);
+    logger?.writeDebug("---OPENAI RESPONSE---");
+    logger?.writeDebug(responseText);
 
     return {
       message: responseText,

@@ -9,7 +9,7 @@ import {
   InvalidCredentialsError,
   MissingAnthropicEnvVarError,
 } from "../errors.js";
-import { getLogger } from "../logger.js";
+import { Logger } from "../index.js";
 
 export type AnthropicConfig = {
   apiKey: string;
@@ -44,16 +44,14 @@ function convertToSDKFormat(
   });
 }
 
-export function getAPI(configLoader: () => Promise<AnthropicConfig>) {
+export function getAPI(configLoader: () => Promise<AnthropicConfig>, logger? : Logger) {
   let config: AnthropicConfig | undefined;
 
   async function completion(
     messages: CompletionInputMessage[],
     options: CompletionOptions,
-    isDebug?: boolean,
     reloadConfig?: boolean
   ): Promise<CompletionResult> {
-    const logger = getLogger(isDebug);
     if (!config || reloadConfig) {
       config = await configLoader();
     }
@@ -64,10 +62,10 @@ export function getAPI(configLoader: () => Promise<AnthropicConfig>) {
       throw new MissingAnthropicEnvVarError();
     }
 
-    logger.writeDebug(`ANTHROPIC: model=${options.model.alias ?? options.model.name}`);
+    logger?.writeDebug(`ANTHROPIC: model=${options.model.alias ?? options.model.name}`);
 
     if (options.maxTokens) {
-      logger.writeDebug(`ANTHROPIC: maxTokens=${options.maxTokens}`);
+      logger?.writeDebug(`ANTHROPIC: maxTokens=${options.maxTokens}`);
     }
 
     const anthropic = new Anthropic({
@@ -122,8 +120,8 @@ export function getAPI(configLoader: () => Promise<AnthropicConfig>) {
       }
     }
 
-    logger.writeDebug("---ANTHROPIC RESPONSE---");
-    logger.writeDebug(responseText);
+    logger?.writeDebug("---ANTHROPIC RESPONSE---");
+    logger?.writeDebug(responseText);
 
     return {
       message: responseText,

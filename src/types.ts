@@ -1,3 +1,8 @@
+import { AnthropicConfig } from "./api/anthropic.js";
+import { OpenAIConfig } from "./api/openai.js";
+import { CompletionOptions } from "./CompletionOptions.js";
+import { CompletionResult } from "./CompletionResult.js";
+
 export type FileContent = {
   path: string;
   content: string;
@@ -41,3 +46,23 @@ export type CompletionInputMessage =
 export type ParseFunc = (response: string) => Promise<FileContent[]>;
 
 export type ResponseParsers = "file-block";
+
+export type Logger = {
+  writeError: (text?: string) => void;
+  writeDebug: (text?: string) => void;
+};
+
+export type CompletionFunc = (
+  messages: CompletionInputMessage[],
+  options: CompletionOptions,
+  reloadConfig?: boolean
+) => Promise<CompletionResult>;
+
+export type LLMAPI = {
+  completion: CompletionFunc;
+};
+
+export type ConfigLoaders = {
+  openai: () => Promise<OpenAIConfig>;
+  anthropic: () => Promise<AnthropicConfig>;
+};
