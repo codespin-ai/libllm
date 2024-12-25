@@ -66,7 +66,7 @@ export function getAPI(
 
     const apiKey = (process.env as any).ANTHROPIC_API_KEY ?? config?.apiKey;
 
-    if (apiKey) {
+    if (!apiKey) {
       throw new MissingAnthropicEnvVarError();
     }
 
