@@ -1,7 +1,5 @@
-import {
-  createStreamingFileParser,
-  StreamingFileParseResult,
-} from "../responseParsing/streamingFileParser.js";
+import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
+import { StreamingFileParseResult } from "../types.js";
 
 describe("streamingFileParser", () => {
   let results: StreamingFileParseResult[];

@@ -1,6 +1,6 @@
 {
   "name": "libllm",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "CodeSpin.AI's LLM library",
   "main": "dist/index.js",
   "scripts": {

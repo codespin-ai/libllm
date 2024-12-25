@@ -1,11 +1,5 @@
 import { execRegexSafely } from "../execRegexSafely.js";
-import { FileContent } from "../types.js";
-
-export type StreamingFileParseResult =
-  | { type: "text"; content: string }
-  | { type: "end-file-block"; file: FileContent }
-  | { type: "start-file-block"; path: string }
-  | { type: "text-block"; content: string };
+import { FileContent, StreamingFileParseResult } from "../types.js";
 
 // Regex to match the start of a file block with backticks
 const startFileRegexBackticks = /File path:\s*([\w./-]+)\s*\n\s*```(?:\w*)\n/g;

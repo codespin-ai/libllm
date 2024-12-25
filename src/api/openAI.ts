@@ -5,10 +5,10 @@ import { createStreamingFileParser } from "../responseParsing/streamingFileParse
 import {
   CompletionContentPart,
   CompletionInputMessage,
+  CompletionOptions,
+  CompletionResult,
   Logger,
 } from "../types.js";
-import { CompletionOptions } from "../CompletionOptions.js";
-import { CompletionResult } from "../CompletionResult.js";
 import {
   ClientInitializationError,
   InvalidCredentialsError,

@@ -1,9 +1,12 @@
 import Anthropic, {
   AuthenticationError as AnthropicAuthenticationError,
 } from "@anthropic-ai/sdk";
-import { CompletionOptions } from "../CompletionOptions.js";
-import { CompletionResult } from "../CompletionResult.js";
-import { CompletionInputMessage, CompletionContentPart } from "../types.js";
+import {
+  CompletionInputMessage,
+  CompletionContentPart,
+  CompletionOptions,
+  CompletionResult,
+} from "../types.js";
 import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
 import {
   InvalidCredentialsError,
@@ -44,7 +47,10 @@ function convertToSDKFormat(
   });
 }
 
-export function getAPI(configLoader: () => Promise<AnthropicConfig>, logger? : Logger) {
+export function getAPI(
+  configLoader: () => Promise<AnthropicConfig>,
+  logger?: Logger
+) {
   let config: AnthropicConfig | undefined;
 
   async function completion(
@@ -62,7 +68,9 @@ export function getAPI(configLoader: () => Promise<AnthropicConfig>, logger? : L
       throw new MissingAnthropicEnvVarError();
     }
 
-    logger?.writeDebug(`ANTHROPIC: model=${options.model.alias ?? options.model.name}`);
+    logger?.writeDebug(
+      `ANTHROPIC: model=${options.model.alias ?? options.model.name}`
+    );
 
     if (options.maxTokens) {
       logger?.writeDebug(`ANTHROPIC: maxTokens=${options.maxTokens}`);
