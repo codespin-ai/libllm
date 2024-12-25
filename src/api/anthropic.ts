@@ -102,7 +102,7 @@ export function getAPI(
       }
 
       const { processChunk, finish } = options.fileResultStreamCallback
-        ? createStreamingFileParser(options.fileResultStreamCallback)
+        ? createStreamingFileParser(options.fileResultStreamCallback, undefined, undefined)
         : { processChunk: undefined, finish: undefined };
 
       stream.on("text", (text) => {

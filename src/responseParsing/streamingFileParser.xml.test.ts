@@ -8,9 +8,13 @@ describe("streamingFileParser", () => {
 
   beforeEach(() => {
     results = [];
-    const streamingParser = createStreamingFileParser((result) => {
-      results.push(result);
-    }, xmlElement);
+    const streamingParser = createStreamingFileParser(
+      (result) => {
+        results.push(result);
+      },
+      undefined,
+      xmlElement
+    );
 
     processChunk = streamingParser.processChunk;
   });
@@ -231,9 +235,13 @@ const second = false;
 
     test("handles XML with different element names", () => {
       results = [];
-      const { processChunk } = createStreamingFileParser((result) => {
-        results.push(result);
-      }, "source");
+      const { processChunk } = createStreamingFileParser(
+        (result) => {
+          results.push(result);
+        },
+        undefined,
+        "source"
+      );
 
       const input = `File path: src/test.ts
 <source>
@@ -437,9 +445,13 @@ const x = 1;
 
     beforeEach(() => {
       results = [];
-      const streamingParser = createStreamingFileParser((result) => {
-        results.push(result);
-      }, xmlElement);
+      const streamingParser = createStreamingFileParser(
+        (result) => {
+          results.push(result);
+        },
+        undefined,
+        xmlElement
+      );
       processChunk = streamingParser.processChunk;
       finish = streamingParser.finish;
     });

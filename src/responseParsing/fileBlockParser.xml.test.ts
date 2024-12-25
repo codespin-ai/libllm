@@ -11,7 +11,7 @@ File path: src/files/readJson.ts
 export function readJson() {}
 </code>
 `;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -27,7 +27,7 @@ File path: src/files/readJson.ts
 export function readJson() {}
 </code>
 `;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input,undefined,  xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -47,7 +47,7 @@ File path: src/files/writeJson.ts
 export function writeJson() {}
 </code>
 `;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -62,7 +62,7 @@ export function writeJson() {}
 
     it("handles empty input gracefully", async () => {
       const input = ``;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([]);
     });
 
@@ -80,7 +80,7 @@ File path: src/files/writeJson.ts
 export function writeJson() {}
 </code>
 `;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -109,7 +109,7 @@ export function writeJson() {}
 
 More content here to be ignored.
 `;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -136,7 +136,7 @@ file 2 partial
 File 2 should not be parsed since the closing tag is missing.
     `;
 
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -158,7 +158,7 @@ File path: src/files/writeJson.ts
 export function writeJson() {}
 </code>
 `;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/writeJson.ts",
@@ -180,7 +180,7 @@ File path: src/files/content.ts
 actual content
 </code>
 `;
-      const result = await fileBlockParser(input, xmlElement);
+      const result = await fileBlockParser(input, undefined, xmlElement);
       expect(result).toEqual([
         {
           path: "src/files/content.ts",
@@ -197,7 +197,7 @@ File path: src/files/test.ts
 export function test() {}
 </source>
 `;
-      const result = await fileBlockParser(input, customElement);
+      const result = await fileBlockParser(input, undefined, customElement);
       expect(result).toEqual([
         {
           path: "src/files/test.ts",

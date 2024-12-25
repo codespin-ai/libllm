@@ -112,7 +112,7 @@ export function getAPI(
       }
 
       const { processChunk, finish } = options.fileResultStreamCallback
-        ? createStreamingFileParser(options.fileResultStreamCallback)
+        ? createStreamingFileParser(options.fileResultStreamCallback, undefined, undefined)
         : { processChunk: undefined, finish: undefined };
 
       for await (const chunk of stream) {

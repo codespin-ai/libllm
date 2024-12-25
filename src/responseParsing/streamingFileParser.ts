@@ -1,22 +1,29 @@
 import { execRegexSafely } from "../execRegexSafely.js";
 import { FileContent, StreamingFileParseResult } from "../types.js";
 
-// Regex to match the start of a file block with backticks
-const startFileRegexBackticks = /File path:\s*([\w./-]+)\s*\n\s*```(?:\w*)\n/g;
+// Function to create regex for file blocks with backticks
+function createStartFileRegexBackticks(filePathPrefix: string) {
+  return new RegExp(
+    `${filePathPrefix}\\s*([\\w./-]+)\\s*\\n\\s*\`\`\`(?:\\w*)\\n`,
+    "g"
+  );
+}
 
 // Regex to match the end of a file block with backticks
 const endFileRegexBackticks = /\s*```\n?/g;
 
 // Function to create start regex for XML tags
-const createStartFileRegexXml = (xmlElement: string) =>
-  new RegExp(
-    `File path:\\s*([\\w./-]+)\\s*\\n\\s*<${xmlElement}>(?:\\n)?`,
+function createStartFileRegexXml(filePathPrefix: string, xmlElement: string) {
+  return new RegExp(
+    `${filePathPrefix}\\s*([\\w./-]+)\\s*\\n\\s*<${xmlElement}>(?:\\n)?`,
     "g"
   );
+}
 
 // Function to create end regex for XML tags
-const createEndFileRegexXml = (xmlElement: string) =>
-  new RegExp(`\\s*</${xmlElement}>\\n?`, "g");
+function createEndFileRegexXml(xmlElement: string) {
+  return new RegExp(`\\s*</${xmlElement}>\\n?`, "g");
+}
 
 // Regex to match language identifier line
 const languageLineRegex = /^\w+\n/;
@@ -28,16 +35,19 @@ export type StreamingFileParser = {
 
 export function createStreamingFileParser(
   callback: (result: StreamingFileParseResult) => void,
-  xmlCodeBlockElement?: string
+  maybeFilePathPrefix: string | undefined,
+  xmlCodeBlockElement: string | undefined
 ): StreamingFileParser {
+  const filePathPrefix = maybeFilePathPrefix || "File path:";
+  
   let buffer: string = ""; // Buffer to accumulate incoming text
   let insideFileBlock: boolean = false; // Flag to track if we're inside a file block
   let currentFilePath: string = ""; // Variable to store the current file path
 
   // Choose the appropriate regex based on whether XML mode is enabled
   const startFileRegex = xmlCodeBlockElement
-    ? createStartFileRegexXml(xmlCodeBlockElement)
-    : startFileRegexBackticks;
+    ? createStartFileRegexXml(filePathPrefix, xmlCodeBlockElement)
+    : createStartFileRegexBackticks(filePathPrefix);
 
   const endFileRegex = xmlCodeBlockElement
     ? createEndFileRegexXml(xmlCodeBlockElement)

@@ -9,7 +9,7 @@ File path: src/files/readJson.ts
 export function readJson() {}
 \`\`\`
 `;
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -25,7 +25,7 @@ File path: src/files/readJson.ts
 export function readJson() {}
 \`\`\`
 `;
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -41,7 +41,7 @@ File path: src/files/readJson.ts
 export function readJson() {}
 \`\`\`
 `;
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -61,7 +61,7 @@ File path: src/files/writeJson.ts
 export function writeJson() {}
 \`\`\`
 `;
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -76,7 +76,7 @@ export function writeJson() {}
 
     it("handles empty input gracefully", async () => {
       const input = ``;
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([]);
     });
 
@@ -94,7 +94,7 @@ File path: src/files/writeJson.ts
 export function writeJson() {}
 \`\`\`
 `;
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -123,7 +123,7 @@ export function writeJson() {}
 
 More content here to be ignored.
 `;
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",
@@ -150,7 +150,7 @@ file 2 partial
 File 2 should not be parsed since the closing triple backticks are missing.
     `;
 
-      const result = await fileBlockParser(input, "");
+      const result = await fileBlockParser(input, undefined, undefined);
       expect(result).toEqual([
         {
           path: "src/files/readJson.ts",

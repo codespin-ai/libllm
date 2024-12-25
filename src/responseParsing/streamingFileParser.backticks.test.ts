@@ -1,6 +1,4 @@
-import {
-  createStreamingFileParser,
-} from "../responseParsing/streamingFileParser.js";
+import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
 import { StreamingFileParseResult } from "../types.js";
 
 describe("streamingFileParser", () => {
@@ -9,9 +7,13 @@ describe("streamingFileParser", () => {
 
   beforeEach(() => {
     results = [];
-    const streamingParser = createStreamingFileParser((result) => {
-      results.push(result);
-    });
+    const streamingParser = createStreamingFileParser(
+      (result) => {
+        results.push(result);
+      },
+      undefined,
+      undefined
+    );
     processChunk = streamingParser.processChunk;
   });
 
@@ -413,9 +415,13 @@ const x = 1;
 
     beforeEach(() => {
       results = [];
-      const streamingParser = createStreamingFileParser((result) => {
-        results.push(result);
-      });
+      const streamingParser = createStreamingFileParser(
+        (result) => {
+          results.push(result);
+        },
+        undefined,
+        undefined
+      );
       processChunk = streamingParser.processChunk;
       finish = streamingParser.finish;
     });

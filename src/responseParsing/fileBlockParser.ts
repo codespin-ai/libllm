@@ -3,23 +3,35 @@ import { execRegexSafely } from "../execRegexSafely.js";
 
 export async function fileBlockParser(
   response: string,
+  maybeFilePathPrefix: string | undefined,
   xmlCodeBlockElement: string | undefined
 ): Promise<FileContent[]> {
+  const filePathPrefix = maybeFilePathPrefix || "File path:";
   if (xmlCodeBlockElement) {
-    return parseXmlContent(response, xmlCodeBlockElement);
+    return parseXmlContent(response, filePathPrefix, xmlCodeBlockElement);
   }
-  return parseFileContent(response);
+  return parseFileContent(response, filePathPrefix);
 }
 
-const filePathRegex =
-  /File path:\s*([\w./-]+)\s*\n^```(?:\w*\n)?([\s\S]*?)^```/gm;
+function createFilePathRegex(filePathPrefix: string) {
+  return new RegExp(
+    `${filePathPrefix}\\s*([\\w./-]+)\\s*\\n^\`\`\`(?:\\w*\\n)?([\\s\\S]*?)^\`\`\``,
+    "gm"
+  );
+}
 
 // This regex captures anything that looks like "File path: path" format
-const filePathExtractor = /File path:\s*([\w./-]+)/;
+function createFilePathExtractor(filePathPrefix: string) {
+  return new RegExp(`${filePathPrefix}\\s*([\\w./-]+)`);
+}
 
-function parseFileContent(input: string): FileContent[] {
+function parseFileContent(
+  input: string,
+  filePathPrefix: string
+): FileContent[] {
   const results: FileContent[] = [];
   let remainingInput = input;
+  const filePathRegex = createFilePathRegex(filePathPrefix);
 
   while (remainingInput.trim() !== "") {
     const match = execRegexSafely(filePathRegex, remainingInput);
@@ -41,7 +53,11 @@ function parseFileContent(input: string): FileContent[] {
   return results;
 }
 
-function parseXmlContent(input: string, xmlElement: string): FileContent[] {
+function parseXmlContent(
+  input: string,
+  filePathPrefix: string,
+  xmlElement: string
+): FileContent[] {
   const results: FileContent[] = [];
 
   // Create a regex that matches the XML tags and captures their content
@@ -49,6 +65,7 @@ function parseXmlContent(input: string, xmlElement: string): FileContent[] {
     `<${xmlElement}>([\\s\\S]*?)</${xmlElement}>`,
     "g"
   );
+  const filePathExtractor = createFilePathExtractor(filePathPrefix);
 
   let match;
   while ((match = xmlRegex.exec(input)) !== null) {
