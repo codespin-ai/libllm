@@ -56,7 +56,7 @@ export type ModelDescription = {
   alias?: string; // Optional friendly name
   provider: string; // LLM provider ("openai" or "anthropic")
   maxOutputTokens: number; // Maximum allowed response length
-  iq?: number; // Intelligence Quotient (IQ) of the model
+  description?: string; // Intelligence Quotient (IQ) of the model
 };
 
 // Configuration Types for API Access
