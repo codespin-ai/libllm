@@ -35,11 +35,9 @@ export type StreamingFileParser = {
 
 export function createStreamingFileParser(
   callback: (result: StreamingFileParseResult) => void,
-  maybeFilePathPrefix: string | undefined,
+  filePathPrefix: string,
   xmlCodeBlockElement: string | undefined
 ): StreamingFileParser {
-  const filePathPrefix = maybeFilePathPrefix || "File path:";
-  
   let buffer: string = ""; // Buffer to accumulate incoming text
   let insideFileBlock: boolean = false; // Flag to track if we're inside a file block
   let currentFilePath: string = ""; // Variable to store the current file path

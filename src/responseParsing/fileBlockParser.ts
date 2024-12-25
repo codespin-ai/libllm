@@ -3,10 +3,9 @@ import { execRegexSafely } from "../execRegexSafely.js";
 
 export async function fileBlockParser(
   response: string,
-  maybeFilePathPrefix: string | undefined,
+  filePathPrefix: string,
   xmlCodeBlockElement: string | undefined
 ): Promise<FileContent[]> {
-  const filePathPrefix = maybeFilePathPrefix || "File path:";
   if (xmlCodeBlockElement) {
     return parseXmlContent(response, filePathPrefix, xmlCodeBlockElement);
   }

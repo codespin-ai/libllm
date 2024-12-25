@@ -18,6 +18,8 @@ export type AnthropicConfig = {
   apiKey: string;
 };
 
+const FILE_PATH_PREFIX = "File path:";
+
 function convertToSDKFormat(
   content: string | CompletionContentPart[]
 ):
@@ -102,7 +104,7 @@ export function getAPI(
       }
 
       const { processChunk, finish } = options.fileResultStreamCallback
-        ? createStreamingFileParser(options.fileResultStreamCallback, undefined, undefined)
+        ? createStreamingFileParser(options.fileResultStreamCallback, FILE_PATH_PREFIX, undefined)
         : { processChunk: undefined, finish: undefined };
 
       stream.on("text", (text) => {

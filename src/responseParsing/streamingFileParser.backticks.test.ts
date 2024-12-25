@@ -1,6 +1,8 @@
 import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
 import { StreamingFileParseResult } from "../types.js";
 
+const FILE_PATH_PREFIX = "File path: ";
+
 describe("streamingFileParser", () => {
   let results: StreamingFileParseResult[];
   let processChunk: (chunk: string) => void;
@@ -11,7 +13,7 @@ describe("streamingFileParser", () => {
       (result) => {
         results.push(result);
       },
-      undefined,
+      FILE_PATH_PREFIX,
       undefined
     );
     processChunk = streamingParser.processChunk;
@@ -419,7 +421,7 @@ const x = 1;
         (result) => {
           results.push(result);
         },
-        undefined,
+        FILE_PATH_PREFIX,
         undefined
       );
       processChunk = streamingParser.processChunk;
