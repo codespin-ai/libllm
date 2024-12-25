@@ -1,5 +1,5 @@
 import { AnthropicConfig } from "./api/anthropic.js";
-import { OpenAIConfig } from "./api/openai.js";
+import { OpenAIConfig } from "./api/openAI.js";
 import { CompletionOptions } from "./CompletionOptions.js";
 import { CompletionResult } from "./CompletionResult.js";
 
@@ -63,6 +63,6 @@ export type LLMAPI = {
 };
 
 export type ConfigLoaders = {
-  openai: () => Promise<OpenAIConfig>;
+  openAI: () => Promise<OpenAIConfig>;
   anthropic: () => Promise<AnthropicConfig>;
 };
