@@ -8,11 +8,15 @@ export { fileBlockParser } from "./responseParsing/fileBlockParser.js";
 export { createStreamingFileParser } from "./responseParsing/streamingFileParser.js";
 export * from "./types.js";
 
-export function getAPI(name: string, configLoaders: ConfigLoaders, logger?: Logger): LLMAPI {
+export function getAPI(
+  name: string,
+  configLoaders: ConfigLoaders,
+  logger?: Logger
+): LLMAPI {
   if (name === "openai") {
-    return openAI.getAPI(configLoaders.openAI);
+    return openAI.getAPI(configLoaders.openAI, logger);
   } else if (name === "anthropic") {
-    return openAI.getAPI(configLoaders.anthropic);
+    return openAI.getAPI(configLoaders.anthropic, logger);
   } else {
     throw new InvalidProviderError();
   }
