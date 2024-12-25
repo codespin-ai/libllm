@@ -1,4 +1,5 @@
 import * as openAI from "./api/openAI.js";
+import * as anthropic from "./api/anthropic.js";
 import { InvalidProviderError } from "./errors.js";
 import { ConfigLoaders, LLMAPI, Logger } from "./types.js";
 export { AnthropicConfig } from "./api/anthropic.js";
@@ -16,7 +17,7 @@ export function getAPI(
   if (name === "openai") {
     return openAI.getAPI(configLoaders.openAI, logger);
   } else if (name === "anthropic") {
-    return openAI.getAPI(configLoaders.anthropic, logger);
+    return anthropic.getAPI(configLoaders.anthropic, logger);
   } else {
     throw new InvalidProviderError();
   }
