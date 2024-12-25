@@ -103,6 +103,6 @@ export type ResponseParsers = "file-block";
 
 // Logging Interface
 export type Logger = {
-  writeError: (text?: string) => void;
-  writeDebug: (text?: string) => void;
+  writeError: (text: string) => void;
+  writeDebug: (text: string) => void;
 };
