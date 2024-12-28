@@ -72,33 +72,79 @@ function convertMessagesToOpenAIFormat(
   });
 }
 
-async function loadConfig(configDir: string): Promise<OpenAIConfig> {
+async function loadConfig(
+  configDir: string,
+  globalConfigDir?: string
+): Promise<OpenAIConfig> {
   if (configCache) {
     return configCache.config;
   }
 
-  const configPath = path.join(configDir, "openai.json");
-  try {
-    const configContent = await readFile(configPath, "utf-8");
-    const config = JSON.parse(configContent) as OpenAIConfig;
-    configCache = { config };
-    return config;
-  } catch (error) {
-    throw new Error(`Failed to load OpenAI config: ${error}`);
+  let config = { ...defaultConfig, apiKey: "" }; // Start with empty API key
+
+  // Load global config to get API key if provided
+  if (globalConfigDir) {
+    try {
+      const globalConfigPath = path.join(globalConfigDir, "openai.json");
+      const globalConfigContent = await readFile(globalConfigPath, "utf-8");
+      const globalConfig = JSON.parse(globalConfigContent) as OpenAIConfig;
+      config.apiKey = globalConfig.apiKey;
+    } catch (error) {
+      // If global config doesn't exist, continue without apiKey
+    }
   }
+
+  // Load local config, allowing it to override everything including apiKey
+  try {
+    const configPath = path.join(configDir, "openai.json");
+    const configContent = await readFile(configPath, "utf-8");
+    const localConfig = JSON.parse(configContent) as OpenAIConfig;
+    config = { ...config, ...localConfig };
+  } catch (error) {
+    // If local config doesn't exist, use what we have
+  }
+
+  configCache = { config };
+  return config;
 }
 
-async function reloadConfig(configDir: string): Promise<void> {
+async function reloadConfig(
+  configDir: string,
+  globalConfigDir?: string
+): Promise<void> {
   configCache = undefined;
-  await loadConfig(configDir);
+  await loadConfig(configDir, globalConfigDir);
 }
 
 export function getAPI(configDir: string, logger?: Logger) {
   let openaiClient: OpenAI | undefined;
 
-  async function init(): Promise<void> {
-    const configPath = path.join(configDir, "openai.json");
-    await writeFile(configPath, JSON.stringify(defaultConfig, null, 2));
+  async function init(options?: {
+    storeKeysGlobally?: boolean;
+    globalConfigDir?: string;
+  }): Promise<void> {
+    const baseConfig = { ...defaultConfig };
+
+    if (options?.storeKeysGlobally && options.globalConfigDir) {
+      // Write only API key to global config
+      const globalConfigPath = path.join(
+        options.globalConfigDir,
+        "openai.json"
+      );
+      await writeFile(
+        globalConfigPath,
+        JSON.stringify({ apiKey: baseConfig.apiKey }, null, 2)
+      );
+
+      // Write everything except API key to local config
+      const { apiKey: _, ...localConfig } = baseConfig;
+      const configPath = path.join(configDir, "openai.json");
+      await writeFile(configPath, JSON.stringify(localConfig, null, 2));
+    } else {
+      // Write full config locally
+      const configPath = path.join(configDir, "openai.json");
+      await writeFile(configPath, JSON.stringify(baseConfig, null, 2));
+    }
   }
 
   async function getModels(): Promise<ModelDescription[]> {

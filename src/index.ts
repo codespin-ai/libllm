@@ -1,14 +1,14 @@
-import * as openAI from "./providers/openai/api.js";
-import * as anthropic from "./providers/anthropic/api.js";
 import { InvalidProviderError } from "./errors.js";
-import { CompletionOptions, ConfigLoaders, LLMAPI, Logger } from "./types.js";
+import * as anthropic from "./providers/anthropic/api.js";
+import * as openAI from "./providers/openai/api.js";
+import { LLMAPI, Logger } from "./types.js";
 export { AnthropicConfig } from "./providers/anthropic/models.js";
 export { OpenAIConfig } from "./providers/openai/models.js";
-export { ModelDescription } from "./types.js";
 export { extractFromMarkdownCodeBlock } from "./responseParsing/codeBlocks.js";
 export { fileBlockParser } from "./responseParsing/fileBlockParser.js";
 export { createStreamingFileParser } from "./responseParsing/streamingFileParser.js";
 export * from "./types.js";
+export { ModelDescription } from "./types.js";
 
 const providers = {
   openai: openAI,
