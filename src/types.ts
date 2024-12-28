@@ -76,7 +76,9 @@ export type CompletionFunc = (
 export type LLMAPI = {
   completion: CompletionFunc;
   getModels: () => Promise<ModelDescription[]>;
-  init: () => Promise<void>;
+  init: (options?: {
+    storeKeysGlobally?: boolean;
+  }) => Promise<void>;
 };
 
 // Options for controlling completion behavior
