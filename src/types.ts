@@ -73,12 +73,18 @@ export type CompletionFunc = (
 ) => Promise<CompletionResult>;
 
 // Interface implemented by LLM providers
+export type InitResult = {
+  created: string[];
+  skipped: string[];
+};
+
 export type LLMAPI = {
   completion: CompletionFunc;
   getModels: () => Promise<ModelDescription[]>;
   init: (options?: {
     storeKeysGlobally?: boolean;
-  }) => Promise<void>;
+    force?: boolean;
+  }) => Promise<InitResult>
 };
 
 // Options for controlling completion behavior

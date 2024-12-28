@@ -10,6 +10,7 @@ import {
   CompletionResult,
   ModelDescription,
   Logger,
+  InitResult,
 } from "../../types.js";
 import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
 import {
@@ -24,6 +25,7 @@ import {
   mapToModelDescription,
 } from "./models.js";
 import { CachedConfig } from "../types.js";
+import { access } from "fs/promises";
 
 const FILE_PATH_PREFIX = "File path:";
 
@@ -125,26 +127,72 @@ export function getAPI(
 
   async function init(options?: {
     storeKeysGlobally?: boolean;
-  }): Promise<void> {
+    force?: boolean;
+  }): Promise<InitResult> {
     const baseConfig = { ...defaultConfig };
+    const created: string[] = [];
+    const skipped: string[] = [];
 
     if (options?.storeKeysGlobally && globalConfigDir) {
-      // Write only API key to global config
       const globalConfigPath = path.join(globalConfigDir, "openai.json");
-      await writeFile(
-        globalConfigPath,
-        JSON.stringify({ apiKey: baseConfig.apiKey }, null, 2)
-      );
+      const localConfigPath = path.join(configDir, "openai.json");
 
-      // Write everything except API key to local config
-      const { apiKey: _, ...localConfig } = baseConfig;
-      const configPath = path.join(configDir, "openai.json");
-      await writeFile(configPath, JSON.stringify(localConfig, null, 2));
+      // If force is true, overwrite both files
+      if (options.force) {
+        await writeFile(
+          globalConfigPath,
+          JSON.stringify({ apiKey: baseConfig.apiKey }, null, 2)
+        );
+        created.push(globalConfigPath);
+
+        const { apiKey: _, ...localConfig } = baseConfig;
+        await writeFile(localConfigPath, JSON.stringify(localConfig, null, 2));
+        created.push(localConfigPath);
+
+        return { created, skipped };
+      }
+
+      // If force is not true, check each file separately
+      try {
+        await access(globalConfigPath);
+        skipped.push(globalConfigPath);
+      } catch {
+        await writeFile(
+          globalConfigPath,
+          JSON.stringify({ apiKey: baseConfig.apiKey }, null, 2)
+        );
+        created.push(globalConfigPath);
+      }
+
+      try {
+        await access(localConfigPath);
+        skipped.push(localConfigPath);
+      } catch {
+        const { apiKey: _, ...localConfig } = baseConfig;
+        await writeFile(localConfigPath, JSON.stringify(localConfig, null, 2));
+        created.push(localConfigPath);
+      }
     } else {
-      // Write full config locally
       const configPath = path.join(configDir, "openai.json");
-      await writeFile(configPath, JSON.stringify(baseConfig, null, 2));
+
+      // If force is true, always overwrite
+      if (options?.force) {
+        await writeFile(configPath, JSON.stringify(baseConfig, null, 2));
+        created.push(configPath);
+        return { created, skipped };
+      }
+
+      // If force is not true, only write if file doesn't exist
+      try {
+        await access(configPath);
+        skipped.push(configPath);
+      } catch {
+        await writeFile(configPath, JSON.stringify(baseConfig, null, 2));
+        created.push(configPath);
+      }
     }
+
+    return { created, skipped };
   }
 
   async function getModels(): Promise<ModelDescription[]> {
