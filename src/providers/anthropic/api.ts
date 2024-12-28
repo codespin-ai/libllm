@@ -107,9 +107,15 @@ export function getAPI(configDir: string, logger?: Logger) {
       anthropicClient = new Anthropic({ apiKey });
     }
 
-    logger?.writeDebug(
-      `ANTHROPIC: model=${options.model.key}`
-    );
+    // Find the model config based on the key
+    const modelConfig = config.models.find((m) => m.key === options.model.key);
+    if (!modelConfig) {
+      throw new Error(
+        `Model configuration not found for key: ${options.model.key}`
+      );
+    }
+
+    logger?.writeDebug(`ANTHROPIC: model=${options.model.key}`);
 
     if (options.maxTokens) {
       logger?.writeDebug(`ANTHROPIC: maxTokens=${options.maxTokens}`);
@@ -125,9 +131,12 @@ export function getAPI(configDir: string, logger?: Logger) {
 
     try {
       const stream = await anthropicClient.messages.stream({
-        model: options.model.name ?? options.model.key,
-        max_tokens: options.maxTokens ?? options.model.maxOutputTokens,
+        model: modelConfig.name ?? modelConfig.key,
+        max_tokens: options.maxTokens ?? modelConfig.maxOutputTokens,
         messages: sdkMessages,
+        temperature: modelConfig.temperature,
+        top_k: modelConfig.topK,
+        top_p: modelConfig.topP,
       });
 
       if (options.cancelCallback) {

@@ -121,10 +121,16 @@ export function getAPI(configDir: string, logger?: Logger) {
       openaiClient = new OpenAI({ apiKey });
     }
 
+    // Find the model config based on the key
+    const modelConfig = config.models.find(m => m.key === options.model.key);
+    if (!modelConfig) {
+      throw new Error(`Model configuration not found for key: ${options.model.key}`);
+    }
+
     logger?.writeDebug(
       `OPENAI: model=${options.model.key}`
     );
-    const maxTokens = options.maxTokens ?? options.model.maxOutputTokens;
+    const maxTokens = options.maxTokens ?? modelConfig.maxOutputTokens;
     if (maxTokens) {
       logger?.writeDebug(`OPENAI: maxTokens=${maxTokens}`);
     }
@@ -137,9 +143,13 @@ export function getAPI(configDir: string, logger?: Logger) {
 
     try {
       const stream = await openaiClient.chat.completions.create({
-        model: options.model.name ?? options.model.key,
+        model: modelConfig.name ?? modelConfig.key,
         messages: transformedMessages,
         max_tokens: maxTokens,
+        temperature: modelConfig.temperature,
+        top_p: modelConfig.topP,
+        frequency_penalty: modelConfig.frequencyPenalty,
+        presence_penalty: modelConfig.presencePenalty,
         stream: true,
       });
 
