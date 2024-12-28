@@ -14,8 +14,8 @@ export function mapToModelDescription(
   config: AnthropicModelConfig
 ): ModelDescription {
   return {
+    key: config.key,
     name: config.name,
-    alias: config.alias,
     provider: config.provider,
     maxOutputTokens: config.maxOutputTokens,
     description: config.description,

@@ -108,7 +108,7 @@ export function getAPI(configDir: string, logger?: Logger) {
     }
 
     logger?.writeDebug(
-      `ANTHROPIC: model=${options.model.alias ?? options.model.name}`
+      `ANTHROPIC: model=${options.model.key}`
     );
 
     if (options.maxTokens) {
@@ -125,7 +125,7 @@ export function getAPI(configDir: string, logger?: Logger) {
 
     try {
       const stream = await anthropicClient.messages.stream({
-        model: options.model.name,
+        model: options.model.name ?? options.model.key,
         max_tokens: options.maxTokens ?? options.model.maxOutputTokens,
         messages: sdkMessages,
       });

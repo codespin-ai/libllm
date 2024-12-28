@@ -122,7 +122,7 @@ export function getAPI(configDir: string, logger?: Logger) {
     }
 
     logger?.writeDebug(
-      `OPENAI: model=${options.model.alias ?? options.model.name}`
+      `OPENAI: model=${options.model.key}`
     );
     const maxTokens = options.maxTokens ?? options.model.maxOutputTokens;
     if (maxTokens) {
@@ -137,7 +137,7 @@ export function getAPI(configDir: string, logger?: Logger) {
 
     try {
       const stream = await openaiClient.chat.completions.create({
-        model: options.model.name,
+        model: options.model.name ?? options.model.key,
         messages: transformedMessages,
         max_tokens: maxTokens,
         stream: true,

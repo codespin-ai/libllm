@@ -4,8 +4,8 @@ export const defaultConfig: AnthropicConfig = {
   apiKey: "",
   models: [
     {
+      key: "claude-3-5-sonnet",
       name: "claude-3-5-sonnet-20241022",
-      alias: "claude-3-5-sonnet",
       provider: "anthropic",
       maxInputTokens: 200000,
       maxOutputTokens: 8192,
@@ -15,8 +15,8 @@ export const defaultConfig: AnthropicConfig = {
       topP: 0.9,
     },
     {
+      key: "claude-3-5-haiku",
       name: "claude-3-5-haiku-20241022",
-      alias: "claude-3-5-haiku",
       provider: "anthropic",
       maxInputTokens: 200000,
       maxOutputTokens: 8192,
