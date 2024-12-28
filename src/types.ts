@@ -56,17 +56,12 @@ export type ModelDescription = {
   alias?: string; // Optional friendly name
   provider: string; // LLM provider ("openai" or "anthropic")
   maxOutputTokens: number; // Maximum allowed response length
-  description?: string; // Intelligence Quotient (IQ) of the model
+  description?: string; // Description of the model's capabilities
 };
 
 // Configuration Types for API Access
-import { AnthropicConfig } from "./api/anthropic.js";
-import { OpenAIConfig } from "./api/openAI.js";
-
-// Functions to load provider-specific configurations
 export type ConfigLoaders = {
-  openAI: () => Promise<OpenAIConfig>;
-  anthropic: () => Promise<AnthropicConfig>;
+  configDir: string;
 };
 
 // API Types for LLM Communication
@@ -80,12 +75,14 @@ export type CompletionFunc = (
 // Interface implemented by LLM providers
 export type LLMAPI = {
   completion: CompletionFunc;
+  getModels: () => Promise<ModelDescription[]>;
+  init: () => Promise<void>;
 };
 
 // Options for controlling completion behavior
 export type CompletionOptions = {
   model: ModelDescription;
-  maxTokens: number | undefined; // Max tokens to generate
+  maxTokens?: number; // Max tokens to generate
   reloadConfig?: boolean; // Force config reload
   cancelCallback?: (cancel: () => void) => void; // For cancelling requests
   responseStreamCallback?: (data: string) => void; // Stream raw responses

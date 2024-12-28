@@ -1,24 +1,32 @@
+import { readFile, writeFile } from "fs/promises";
+import path from "path";
 import OpenAI, {
   AuthenticationError as OpenAIAuthenticationError,
 } from "openai";
-import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
 import {
-  CompletionContentPart,
   CompletionInputMessage,
+  CompletionContentPart,
   CompletionOptions,
   CompletionResult,
+  ModelDescription,
   Logger,
-} from "../types.js";
+} from "../../types.js";
+import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
 import {
-  ClientInitializationError,
   InvalidCredentialsError,
-} from "../errors.js";
-
-export type OpenAIConfig = {
-  apiKey: string;
-};
+  ClientInitializationError,
+} from "../../errors.js";
+import { defaultConfig } from "./defaultConfig.js";
+import {
+  OpenAIConfig,
+  OpenAIModelConfig,
+  mapToModelDescription,
+} from "./models.js";
+import { CachedConfig } from "../types.js";
 
 const FILE_PATH_PREFIX = "File path:";
+
+let configCache: CachedConfig<OpenAIModelConfig> | undefined;
 
 function convertContentToOpenAIFormat(
   content: string | CompletionContentPart[]
@@ -63,26 +71,54 @@ function convertMessagesToOpenAIFormat(
   });
 }
 
-export function getAPI(
-  configLoader: () => Promise<OpenAIConfig>,
-  logger?: Logger
-) {
-  let config: OpenAIConfig | undefined;
-  let openaiClient: OpenAI | undefined = undefined;
+async function loadConfig(configDir: string): Promise<OpenAIConfig> {
+  if (configCache) {
+    return configCache.config;
+  }
+
+  const configPath = path.join(configDir, "openai.json");
+  try {
+    const configContent = await readFile(configPath, "utf-8");
+    const config = JSON.parse(configContent) as OpenAIConfig;
+    configCache = { config };
+    return config;
+  } catch (error) {
+    throw new Error(`Failed to load OpenAI config: ${error}`);
+  }
+}
+
+async function reloadConfig(configDir: string): Promise<void> {
+  configCache = undefined;
+  await loadConfig(configDir);
+}
+
+export function getAPI(configDir: string, logger?: Logger) {
+  let openaiClient: OpenAI | undefined;
+
+  async function init(): Promise<void> {
+    const configPath = path.join(configDir, "openai.json");
+    await writeFile(configPath, JSON.stringify(defaultConfig, null, 2));
+  }
+
+  async function getModels(): Promise<ModelDescription[]> {
+    const config = await loadConfig(configDir);
+    return config.models.map(mapToModelDescription);
+  }
 
   async function completion(
     messages: CompletionInputMessage[],
     options: CompletionOptions,
     reloadConfig?: boolean
   ): Promise<CompletionResult> {
-    if (!config || reloadConfig) {
-      config = await configLoader();
-      const apiKey = (process.env as any).ANTHROPIC_API_KEY ?? config?.apiKey;
-      openaiClient = new OpenAI({ apiKey });
+    const config = await loadConfig(configDir);
+    const apiKey = process.env.OPENAI_API_KEY ?? config.apiKey;
+
+    if (!apiKey) {
+      throw new ClientInitializationError("OPENAI");
     }
 
-    if (!openaiClient) {
-      throw new ClientInitializationError("OPENAI");
+    if (!openaiClient || reloadConfig) {
+      openaiClient = new OpenAI({ apiKey });
     }
 
     logger?.writeDebug(
@@ -154,5 +190,9 @@ export function getAPI(
     };
   }
 
-  return { completion };
+  return { completion, getModels, init };
 }
+
+export const openaiProvider = {
+  reloadConfig,
+};

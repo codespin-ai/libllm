@@ -1,3 +1,5 @@
+import { readFile, writeFile } from "fs/promises";
+import path from "path";
 import Anthropic, {
   AuthenticationError as AnthropicAuthenticationError,
 } from "@anthropic-ai/sdk";
@@ -6,19 +8,25 @@ import {
   CompletionContentPart,
   CompletionOptions,
   CompletionResult,
-} from "../types.js";
-import { createStreamingFileParser } from "../responseParsing/streamingFileParser.js";
+  ModelDescription,
+  Logger,
+} from "../../types.js";
+import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
 import {
   InvalidCredentialsError,
   MissingAnthropicEnvVarError,
-} from "../errors.js";
-import { Logger } from "../index.js";
-
-export type AnthropicConfig = {
-  apiKey: string;
-};
+} from "../../errors.js";
+import { defaultConfig } from "./defaultConfig.js";
+import {
+  AnthropicConfig,
+  AnthropicModelConfig,
+  mapToModelDescription,
+} from "./models.js";
+import { CachedConfig } from "../types.js";
 
 const FILE_PATH_PREFIX = "File path:";
+
+let configCache: CachedConfig<AnthropicModelConfig> | undefined;
 
 function convertToSDKFormat(
   content: string | CompletionContentPart[]
@@ -49,25 +57,54 @@ function convertToSDKFormat(
   });
 }
 
-export function getAPI(
-  configLoader: () => Promise<AnthropicConfig>,
-  logger?: Logger
-) {
-  let config: AnthropicConfig | undefined;
+async function loadConfig(configDir: string): Promise<AnthropicConfig> {
+  if (configCache) {
+    return configCache.config;
+  }
+
+  const configPath = path.join(configDir, "anthropic.json");
+  try {
+    const configContent = await readFile(configPath, "utf-8");
+    const config = JSON.parse(configContent) as AnthropicConfig;
+    configCache = { config };
+    return config;
+  } catch (error) {
+    throw new Error(`Failed to load Anthropic config: ${error}`);
+  }
+}
+
+async function reloadConfig(configDir: string): Promise<void> {
+  configCache = undefined;
+  await loadConfig(configDir);
+}
+
+export function getAPI(configDir: string, logger?: Logger) {
+  let anthropicClient: Anthropic | undefined;
+
+  async function init(): Promise<void> {
+    const configPath = path.join(configDir, "anthropic.json");
+    await writeFile(configPath, JSON.stringify(defaultConfig, null, 2));
+  }
+
+  async function getModels(): Promise<ModelDescription[]> {
+    const config = await loadConfig(configDir);
+    return config.models.map(mapToModelDescription);
+  }
 
   async function completion(
     messages: CompletionInputMessage[],
     options: CompletionOptions,
     reloadConfig?: boolean
   ): Promise<CompletionResult> {
-    if (!config || reloadConfig) {
-      config = await configLoader();
-    }
-
-    const apiKey = (process.env as any).ANTHROPIC_API_KEY ?? config?.apiKey;
+    const config = await loadConfig(configDir);
+    const apiKey = process.env.ANTHROPIC_API_KEY ?? config.apiKey;
 
     if (!apiKey) {
       throw new MissingAnthropicEnvVarError();
+    }
+
+    if (!anthropicClient || reloadConfig) {
+      anthropicClient = new Anthropic({ apiKey });
     }
 
     logger?.writeDebug(
@@ -78,10 +115,6 @@ export function getAPI(
       logger?.writeDebug(`ANTHROPIC: maxTokens=${options.maxTokens}`);
     }
 
-    const anthropic = new Anthropic({
-      apiKey,
-    });
-
     const sdkMessages = messages.map((msg) => ({
       role: msg.role,
       content: convertToSDKFormat(msg.content),
@@ -91,7 +124,7 @@ export function getAPI(
     let fullMessage: Anthropic.Messages.Message;
 
     try {
-      const stream = await anthropic.messages.stream({
+      const stream = await anthropicClient.messages.stream({
         model: options.model.name,
         max_tokens: options.maxTokens ?? options.model.maxOutputTokens,
         messages: sdkMessages,
@@ -104,7 +137,11 @@ export function getAPI(
       }
 
       const { processChunk, finish } = options.fileResultStreamCallback
-        ? createStreamingFileParser(options.fileResultStreamCallback, FILE_PATH_PREFIX, undefined)
+        ? createStreamingFileParser(
+            options.fileResultStreamCallback,
+            FILE_PATH_PREFIX,
+            undefined
+          )
         : { processChunk: undefined, finish: undefined };
 
       stream.on("text", (text) => {
@@ -140,5 +177,9 @@ export function getAPI(
     };
   }
 
-  return { completion };
+  return { completion, getModels, init };
 }
+
+export const anthropicProvider = {
+  reloadConfig,
+};
