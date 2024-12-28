@@ -19,14 +19,15 @@ import {
 import { defaultConfig } from "./defaultConfig.js";
 import {
   OpenAIConfig,
-  OpenAIModelConfig,
+  OpenAIModel,
+  OpenAIModelSettings,
   mapToModelDescription,
 } from "./models.js";
 import { CachedConfig } from "../types.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
-let configCache: CachedConfig<OpenAIModelConfig> | undefined;
+let configCache: CachedConfig<OpenAIModel, OpenAIModelSettings> | undefined;
 
 function convertContentToOpenAIFormat(
   content: string | CompletionContentPart[]
@@ -102,7 +103,13 @@ export function getAPI(configDir: string, logger?: Logger) {
 
   async function getModels(): Promise<ModelDescription[]> {
     const config = await loadConfig(configDir);
-    return config.models.map(mapToModelDescription);
+    return config.modelSettings.map((settings) => {
+      const model = config.models.find((m) => m.key === settings.modelKey);
+      if (!model) {
+        throw new Error(`Model not found for key: ${settings.modelKey}`);
+      }
+      return mapToModelDescription(model, settings);
+    });
   }
 
   async function completion(
@@ -121,16 +128,19 @@ export function getAPI(configDir: string, logger?: Logger) {
       openaiClient = new OpenAI({ apiKey });
     }
 
-    // Find the model config based on the key
-    const modelConfig = config.models.find(m => m.key === options.model.key);
-    if (!modelConfig) {
-      throw new Error(`Model configuration not found for key: ${options.model.key}`);
+    const settings = config.modelSettings.find((s) => s.key === options.model);
+    if (!settings) {
+      throw new Error(`Model settings not found for key: ${options.model}`);
     }
 
-    logger?.writeDebug(
-      `OPENAI: model=${options.model.key}`
-    );
-    const maxTokens = options.maxTokens ?? modelConfig.maxOutputTokens;
+    const model = config.models.find((m) => m.key === settings.modelKey);
+    if (!model) {
+      throw new Error(`Model not found for key: ${settings.modelKey}`);
+    }
+
+    logger?.writeDebug(`OPENAI: model=${settings.key}`);
+
+    const maxTokens = options.maxTokens ?? model.maxOutputTokens;
     if (maxTokens) {
       logger?.writeDebug(`OPENAI: maxTokens=${maxTokens}`);
     }
@@ -143,13 +153,13 @@ export function getAPI(configDir: string, logger?: Logger) {
 
     try {
       const stream = await openaiClient.chat.completions.create({
-        model: modelConfig.name ?? modelConfig.key,
+        model: model.key,
         messages: transformedMessages,
         max_tokens: maxTokens,
-        temperature: modelConfig.temperature,
-        top_p: modelConfig.topP,
-        frequency_penalty: modelConfig.frequencyPenalty,
-        presence_penalty: modelConfig.presencePenalty,
+        temperature: settings.temperature,
+        top_p: settings.topP,
+        frequency_penalty: settings.frequencyPenalty,
+        presence_penalty: settings.presencePenalty,
         stream: true,
       });
 
@@ -176,7 +186,6 @@ export function getAPI(configDir: string, logger?: Logger) {
         if (processChunk) {
           processChunk(content);
         }
-        // Check for finish_reason
         finishReason = chunk.choices[0]?.finish_reason;
       }
 

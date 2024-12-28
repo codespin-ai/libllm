@@ -81,12 +81,12 @@ export type LLMAPI = {
 
 // Options for controlling completion behavior
 export type CompletionOptions = {
-  model: ModelDescription;
-  maxTokens?: number; // Max tokens to generate
-  reloadConfig?: boolean; // Force config reload
-  cancelCallback?: (cancel: () => void) => void; // For cancelling requests
-  responseStreamCallback?: (data: string) => void; // Stream raw responses
-  fileResultStreamCallback?: (data: StreamingFileParseResult) => void; // Stream parsed files
+  model: string; // Just the key that references the model settings
+  maxTokens?: number;
+  reloadConfig?: boolean;
+  cancelCallback?: (cancel: () => void) => void;
+  responseStreamCallback?: (data: string) => void;
+  fileResultStreamCallback?: (data: StreamingFileParseResult) => void;
 };
 
 // Result of a completion request

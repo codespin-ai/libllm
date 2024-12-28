@@ -19,14 +19,17 @@ import {
 import { defaultConfig } from "./defaultConfig.js";
 import {
   AnthropicConfig,
-  AnthropicModelConfig,
+  AnthropicModel,
+  AnthropicModelSettings,
   mapToModelDescription,
 } from "./models.js";
 import { CachedConfig } from "../types.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
-let configCache: CachedConfig<AnthropicModelConfig> | undefined;
+let configCache:
+  | CachedConfig<AnthropicModel, AnthropicModelSettings>
+  | undefined;
 
 function convertToSDKFormat(
   content: string | CompletionContentPart[]
@@ -88,7 +91,13 @@ export function getAPI(configDir: string, logger?: Logger) {
 
   async function getModels(): Promise<ModelDescription[]> {
     const config = await loadConfig(configDir);
-    return config.models.map(mapToModelDescription);
+    return config.modelSettings.map((settings) => {
+      const model = config.models.find((m) => m.key === settings.modelKey);
+      if (!model) {
+        throw new Error(`Model not found for key: ${settings.modelKey}`);
+      }
+      return mapToModelDescription(model, settings);
+    });
   }
 
   async function completion(
@@ -107,15 +116,17 @@ export function getAPI(configDir: string, logger?: Logger) {
       anthropicClient = new Anthropic({ apiKey });
     }
 
-    // Find the model config based on the key
-    const modelConfig = config.models.find((m) => m.key === options.model.key);
-    if (!modelConfig) {
-      throw new Error(
-        `Model configuration not found for key: ${options.model.key}`
-      );
+    const settings = config.modelSettings.find((s) => s.key === options.model);
+    if (!settings) {
+      throw new Error(`Model settings not found for key: ${options.model}`);
     }
 
-    logger?.writeDebug(`ANTHROPIC: model=${options.model.key}`);
+    const model = config.models.find((m) => m.key === settings.modelKey);
+    if (!model) {
+      throw new Error(`Model not found for key: ${settings.modelKey}`);
+    }
+
+    logger?.writeDebug(`ANTHROPIC: model=${settings.key}`);
 
     if (options.maxTokens) {
       logger?.writeDebug(`ANTHROPIC: maxTokens=${options.maxTokens}`);
@@ -131,12 +142,12 @@ export function getAPI(configDir: string, logger?: Logger) {
 
     try {
       const stream = await anthropicClient.messages.stream({
-        model: modelConfig.name ?? modelConfig.key,
-        max_tokens: options.maxTokens ?? modelConfig.maxOutputTokens,
+        model: model.key,
+        max_tokens: options.maxTokens ?? model.maxOutputTokens,
         messages: sdkMessages,
-        temperature: modelConfig.temperature,
-        top_k: modelConfig.topK,
-        top_p: modelConfig.topP,
+        temperature: settings.temperature,
+        top_k: settings.topK,
+        top_p: settings.topP,
       });
 
       if (options.cancelCallback) {

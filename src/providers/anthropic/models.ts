@@ -1,23 +1,27 @@
+import { BaseModel, BaseModelSettings } from "../types.js";
 import { ModelDescription } from "../../types.js";
-import { BaseModelConfig } from "../types.js";
 
-export type AnthropicModelConfig = BaseModelConfig & {
+export type AnthropicModel = BaseModel;
+
+export type AnthropicModelSettings = BaseModelSettings & {
   topK?: number;
 };
 
 export type AnthropicConfig = {
   apiKey: string;
-  models: AnthropicModelConfig[];
+  models: AnthropicModel[];
+  modelSettings: AnthropicModelSettings[];
 };
 
 export function mapToModelDescription(
-  config: AnthropicModelConfig
+  model: AnthropicModel,
+  settings: AnthropicModelSettings
 ): ModelDescription {
   return {
-    key: config.key,
-    name: config.name,
-    provider: config.provider,
-    maxOutputTokens: config.maxOutputTokens,
-    description: config.description,
+    key: settings.key,
+    name: model.key,
+    provider: model.provider,
+    maxOutputTokens: model.maxOutputTokens,
+    description: settings.description,
   };
 }

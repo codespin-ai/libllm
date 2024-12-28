@@ -1,24 +1,28 @@
+import { BaseModel, BaseModelSettings } from "../types.js";
 import { ModelDescription } from "../../types.js";
-import { BaseModelConfig } from "../types.js";
 
-export type OpenAIModelConfig = BaseModelConfig & {
+export type OpenAIModel = BaseModel;
+
+export type OpenAIModelSettings = BaseModelSettings & {
   frequencyPenalty?: number;
   presencePenalty?: number;
 };
 
 export type OpenAIConfig = {
   apiKey: string;
-  models: OpenAIModelConfig[];
+  models: OpenAIModel[];
+  modelSettings: OpenAIModelSettings[];
 };
 
 export function mapToModelDescription(
-  config: OpenAIModelConfig
+  model: OpenAIModel,
+  settings: OpenAIModelSettings
 ): ModelDescription {
   return {
-    key: config.key,
-    name: config.name,
-    provider: config.provider,
-    maxOutputTokens: config.maxOutputTokens,
-    description: config.description,
+    key: settings.key,
+    name: model.key,
+    provider: model.provider,
+    maxOutputTokens: model.maxOutputTokens,
+    description: settings.description,
   };
 }

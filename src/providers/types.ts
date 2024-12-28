@@ -1,16 +1,30 @@
-import { ModelDescription } from "../types.js";
-
-export type ProviderConfig<T> = {
-  apiKey: string;
-  models: T[];
+export type BaseModel = {
+  key: string;
+  provider: string;
+  maxInputTokens: number;
+  maxOutputTokens: number;
 };
 
-export type BaseModelConfig = ModelDescription & {
-  maxInputTokens: number;
+export type BaseModelSettings = {
+  key: string;
+  modelKey: string;
+  description: string;
   temperature?: number;
   topP?: number;
 };
 
-export type CachedConfig<T> = {
-  config: ProviderConfig<T>;
+export type ProviderConfig<
+  TModel extends BaseModel,
+  TSettings extends BaseModelSettings
+> = {
+  apiKey: string;
+  models: TModel[];
+  modelSettings: TSettings[];
+};
+
+export type CachedConfig<
+  TModel extends BaseModel,
+  TSettings extends BaseModelSettings
+> = {
+  config: ProviderConfig<TModel, TSettings>;
 };
