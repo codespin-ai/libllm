@@ -108,7 +108,7 @@ async function loadConfig(
   return config;
 }
 
-async function reloadConfig(
+export async function reloadConfig(
   configDir: string,
   globalConfigDir?: string
 ): Promise<void> {
@@ -116,21 +116,21 @@ async function reloadConfig(
   await loadConfig(configDir, globalConfigDir);
 }
 
-export function getAPI(configDir: string, logger?: Logger) {
+export function getAPI(
+  configDir: string,
+  globalConfigDir?: string,
+  logger?: Logger
+) {
   let openaiClient: OpenAI | undefined;
 
   async function init(options?: {
     storeKeysGlobally?: boolean;
-    globalConfigDir?: string;
   }): Promise<void> {
     const baseConfig = { ...defaultConfig };
 
-    if (options?.storeKeysGlobally && options.globalConfigDir) {
+    if (options?.storeKeysGlobally && globalConfigDir) {
       // Write only API key to global config
-      const globalConfigPath = path.join(
-        options.globalConfigDir,
-        "openai.json"
-      );
+      const globalConfigPath = path.join(globalConfigDir, "openai.json");
       await writeFile(
         globalConfigPath,
         JSON.stringify({ apiKey: baseConfig.apiKey }, null, 2)
@@ -148,7 +148,7 @@ export function getAPI(configDir: string, logger?: Logger) {
   }
 
   async function getModels(): Promise<ModelDescription[]> {
-    const config = await loadConfig(configDir);
+    const config = await loadConfig(configDir, globalConfigDir);
     return config.modelSettings.map((settings) => {
       const model = config.models.find((m) => m.key === settings.modelKey);
       if (!model) {
@@ -163,7 +163,7 @@ export function getAPI(configDir: string, logger?: Logger) {
     options: CompletionOptions,
     reloadConfig?: boolean
   ): Promise<CompletionResult> {
-    const config = await loadConfig(configDir);
+    const config = await loadConfig(configDir, globalConfigDir);
     const apiKey = process.env.OPENAI_API_KEY ?? config.apiKey;
 
     if (!apiKey) {
@@ -257,7 +257,3 @@ export function getAPI(configDir: string, logger?: Logger) {
 
   return { completion, getModels, init };
 }
-
-export const openaiProvider = {
-  reloadConfig,
-};

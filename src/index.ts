@@ -15,50 +15,44 @@ const providers = {
   anthropic: anthropic,
 };
 
-let globalConfigDir: string;
-
 export function getAPI(
   name: string,
   configDir: string,
+  globalConfigDir?: string,
   logger?: Logger
 ): LLMAPI {
-  globalConfigDir = configDir;
   if (name === "openai") {
-    return openAI.getAPI(configDir, logger);
+    return openAI.getAPI(configDir, globalConfigDir, logger);
   } else if (name === "anthropic") {
-    return anthropic.getAPI(configDir, logger);
+    return anthropic.getAPI(configDir, globalConfigDir, logger);
   } else {
     throw new InvalidProviderError();
   }
 }
 
-export async function getModels() {
-  if (!globalConfigDir) {
-    throw new Error("Must call getAPI first to set config directory");
-  }
-
+export async function getModels(configDir: string, globalConfigDir?: string) {
   const allModels = [];
   for (const [name, provider] of Object.entries(providers)) {
-    const api = provider.getAPI(globalConfigDir);
+    const api = provider.getAPI(configDir, globalConfigDir);
     const models = await api.getModels();
     allModels.push(...models);
   }
   return allModels;
 }
 
-export async function reloadConfig(provider?: string) {
-  if (!globalConfigDir) {
-    throw new Error("Must call getAPI first to set config directory");
-  }
-
+export async function reloadConfig(
+  configDir: string,
+  globalConfigDir?: string,
+  provider?: string
+) {
   if (provider) {
     // Reload specific provider
     switch (provider) {
       case "openai":
-        await openAI.openaiProvider.reloadConfig(globalConfigDir);
+        await openAI.reloadConfig(configDir, globalConfigDir);
         break;
       case "anthropic":
-        await anthropic.anthropicProvider.reloadConfig(globalConfigDir);
+        await anthropic.reloadConfig(configDir, globalConfigDir);
         break;
       default:
         throw new InvalidProviderError();
@@ -66,8 +60,8 @@ export async function reloadConfig(provider?: string) {
   } else {
     // Reload all providers
     await Promise.all([
-      openAI.openaiProvider.reloadConfig(globalConfigDir),
-      anthropic.anthropicProvider.reloadConfig(globalConfigDir),
+      openAI.reloadConfig(configDir, globalConfigDir),
+      anthropic.reloadConfig(configDir, globalConfigDir),
     ]);
   }
 }
