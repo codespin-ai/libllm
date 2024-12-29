@@ -10,11 +10,6 @@ export { createStreamingFileParser } from "./responseParsing/streamingFileParser
 export * from "./types.js";
 export { ModelDescription } from "./types.js";
 
-const providers = {
-  openai: openAI,
-  anthropic: anthropic,
-};
-
 export function getAPI(
   name: string,
   configDir: string,
@@ -30,14 +25,8 @@ export function getAPI(
   }
 }
 
-export async function getModels(configDir: string, globalConfigDir?: string) {
-  const allModels = [];
-  for (const [name, provider] of Object.entries(providers)) {
-    const api = provider.getAPI(configDir, globalConfigDir);
-    const models = await api.getModels();
-    allModels.push(...models);
-  }
-  return allModels;
+export async function getProviders() {
+  return ["openai", "anthropic"];
 }
 
 export async function reloadConfig(
