@@ -59,7 +59,7 @@ export class MissingCodeBlockError extends ParseError {
 export class ProviderError extends CodeSpinError {}
 
 export class InvalidProviderError extends ProviderError {
-  constructor() {
-    super("Only OpenAI and Anthropic are supported as of now");
+  constructor(name: string) {
+    super(`Invalid provider: ${name}`);
   }
 }

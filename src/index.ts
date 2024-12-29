@@ -26,7 +26,7 @@ export function getAPI(
   } else if (name === "anthropic") {
     return anthropic.getAPI(configDir, globalConfigDir, logger);
   } else {
-    throw new InvalidProviderError();
+    throw new InvalidProviderError(name);
   }
 }
 
@@ -55,7 +55,7 @@ export async function reloadConfig(
         await anthropic.reloadConfig(configDir, globalConfigDir);
         break;
       default:
-        throw new InvalidProviderError();
+        throw new InvalidProviderError(provider);
     }
   } else {
     // Reload all providers
