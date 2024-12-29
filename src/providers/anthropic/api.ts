@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import path from "path";
 import Anthropic, {
   AuthenticationError as AnthropicAuthenticationError,
@@ -24,7 +24,7 @@ import {
   mapToModelDescription,
 } from "./models.js";
 import { CachedConfig } from "../types.js";
-import { access } from "fs/promises";
+import { initializeConfig } from "../initHelper.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
@@ -115,71 +115,11 @@ export function getAPI(
   async function init(options?: {
     storeKeysGlobally?: boolean;
     force?: boolean;
-  }): Promise<{ created: string[]; skipped: string[] }> {
-    const baseConfig = { ...defaultConfig };
-    const created: string[] = [];
-    const skipped: string[] = [];
-
-    if (options?.storeKeysGlobally && globalConfigDir) {
-      const globalConfigPath = path.join(globalConfigDir, "anthropic.json");
-      const localConfigPath = path.join(configDir, "anthropic.json");
-
-      // If force is true, overwrite both files
-      if (options.force) {
-        await writeFile(
-          globalConfigPath,
-          JSON.stringify({ apiKey: baseConfig.apiKey }, null, 2)
-        );
-        created.push(globalConfigPath);
-
-        const { apiKey: _, ...localConfig } = baseConfig;
-        await writeFile(localConfigPath, JSON.stringify(localConfig, null, 2));
-        created.push(localConfigPath);
-
-        return { created, skipped };
-      }
-
-      // If force is not true, check each file separately
-      try {
-        await access(globalConfigPath);
-        skipped.push(globalConfigPath);
-      } catch {
-        await writeFile(
-          globalConfigPath,
-          JSON.stringify({ apiKey: baseConfig.apiKey }, null, 2)
-        );
-        created.push(globalConfigPath);
-      }
-
-      try {
-        await access(localConfigPath);
-        skipped.push(localConfigPath);
-      } catch {
-        const { apiKey: _, ...localConfig } = baseConfig;
-        await writeFile(localConfigPath, JSON.stringify(localConfig, null, 2));
-        created.push(localConfigPath);
-      }
-    } else {
-      const configPath = path.join(configDir, "anthropic.json");
-
-      // If force is true, always overwrite
-      if (options?.force) {
-        await writeFile(configPath, JSON.stringify(baseConfig, null, 2));
-        created.push(configPath);
-        return { created, skipped };
-      }
-
-      // If force is not true, only write if file doesn't exist
-      try {
-        await access(configPath);
-        skipped.push(configPath);
-      } catch {
-        await writeFile(configPath, JSON.stringify(baseConfig, null, 2));
-        created.push(configPath);
-      }
-    }
-
-    return { created, skipped };
+  }) {
+    return initializeConfig("anthropic", defaultConfig, configDir, {
+      ...options,
+      globalConfigDir,
+    });
   }
 
   async function getModels(): Promise<ModelDescription[]> {
