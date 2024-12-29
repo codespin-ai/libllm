@@ -1,7 +1,7 @@
 /**
- * Base class for all CodeSpin specific errors
+ * Base class for all LIBLLM specific errors
  */
-export class CodeSpinError extends Error {
+export class LIBLLMError extends Error {
   constructor(message: string) {
     super(message);
     this.name = this.constructor.name;
@@ -11,7 +11,7 @@ export class CodeSpinError extends Error {
 /**
  * Authentication errors
  */
-export class AuthenticationError extends CodeSpinError {}
+export class AuthenticationError extends LIBLLMError {}
 
 export class InvalidCredentialsError extends AuthenticationError {
   constructor(provider: string) {
@@ -28,7 +28,7 @@ export class ClientInitializationError extends AuthenticationError {
 // /**
 //  * Configuration errors
 //  */
-export class ConfigurationError extends CodeSpinError {}
+export class ConfigurationError extends LIBLLMError {}
 
 export class MissingOpenAIEnvVarError extends ConfigurationError {
   constructor() {
@@ -45,7 +45,7 @@ export class MissingAnthropicEnvVarError extends ConfigurationError {
 // /**
 //  * Parsing errors
 //  */
-export class ParseError extends CodeSpinError {}
+export class ParseError extends LIBLLMError {}
 
 export class MissingCodeBlockError extends ParseError {
   constructor() {
@@ -56,7 +56,7 @@ export class MissingCodeBlockError extends ParseError {
 // /**
 //  * Provider errors
 //  */
-export class ProviderError extends CodeSpinError {}
+export class ProviderError extends LIBLLMError {}
 
 export class InvalidProviderError extends ProviderError {
   constructor(name: string) {
