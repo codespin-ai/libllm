@@ -12,10 +12,7 @@ import {
   Logger,
 } from "../../types.js";
 import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
-import {
-  InvalidCredentialsError,
-  ClientInitializationError,
-} from "../../errors.js";
+import { InvalidCredentialsError } from "../../errors.js";
 import { defaultConfig } from "./defaultConfig.js";
 import {
   OpenAIConfig,
@@ -154,7 +151,7 @@ export function getAPI(
     const apiKey = process.env.OPENAI_API_KEY ?? config.apiKey;
 
     if (!apiKey) {
-      throw new ClientInitializationError("OPENAI");
+      throw new InvalidCredentialsError("OPENAI");
     }
 
     if (!openaiClient || reloadConfig) {

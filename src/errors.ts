@@ -19,28 +19,10 @@ export class InvalidCredentialsError extends AuthenticationError {
   }
 }
 
-export class ClientInitializationError extends AuthenticationError {
-  constructor(provider: string) {
-    super(`Failed to initialize ${provider} client`);
-  }
-}
-
 // /**
 //  * Configuration errors
 //  */
 export class ConfigurationError extends LIBLLMError {}
-
-export class MissingOpenAIEnvVarError extends ConfigurationError {
-  constructor() {
-    super("OPENAI_API_KEY environment variable is not set");
-  }
-}
-
-export class MissingAnthropicEnvVarError extends ConfigurationError {
-  constructor() {
-    super("ANTHROPIC_API_KEY environment variable is not set");
-  }
-}
 
 // /**
 //  * Parsing errors

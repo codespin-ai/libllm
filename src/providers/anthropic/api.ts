@@ -1,21 +1,22 @@
-import { readFile } from "fs/promises";
-import path from "path";
 import Anthropic, {
   AuthenticationError as AnthropicAuthenticationError,
 } from "@anthropic-ai/sdk";
+import { readFile } from "fs/promises";
+import path from "path";
 import {
-  CompletionInputMessage,
-  CompletionContentPart,
-  CompletionOptions,
-  CompletionResult,
-  ModelDescription,
-  Logger,
-} from "../../types.js";
+  InvalidCredentialsError
+} from "../../errors.js";
 import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
 import {
-  InvalidCredentialsError,
-  MissingAnthropicEnvVarError,
-} from "../../errors.js";
+  CompletionContentPart,
+  CompletionInputMessage,
+  CompletionOptions,
+  CompletionResult,
+  Logger,
+  ModelDescription,
+} from "../../types.js";
+import { initializeConfig } from "../initHelper.js";
+import { CachedConfig } from "../types.js";
 import { defaultConfig } from "./defaultConfig.js";
 import {
   AnthropicConfig,
@@ -23,8 +24,6 @@ import {
   AnthropicModelSettings,
   mapToModelDescription,
 } from "./models.js";
-import { CachedConfig } from "../types.js";
-import { initializeConfig } from "../initHelper.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
@@ -142,7 +141,7 @@ export function getAPI(
     const apiKey = process.env.ANTHROPIC_API_KEY ?? config.apiKey;
 
     if (!apiKey) {
-      throw new MissingAnthropicEnvVarError();
+      throw new InvalidCredentialsError("ANTHROPIC");
     }
 
     if (!anthropicClient || reloadConfig) {
