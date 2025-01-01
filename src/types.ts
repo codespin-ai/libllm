@@ -78,20 +78,22 @@ export type InitResult = {
   skipped: string[];
 };
 
+export type LLMAPI = {
+  completion: CompletionFunc;
+  getModels: () => Promise<ModelDescription[]>;
+  init: (options?: {
+    storeKeysGlobally?: boolean;
+    force?: boolean;
+  }) => Promise<InitResult>;
+};
+
 export type LLMProvider = {
   getName: () => string;
   getAPI: (
     configDir: string,
     globalConfigDir?: string,
     logger?: Logger
-  ) => {
-    completion: CompletionFunc;
-    getModels: () => Promise<ModelDescription[]>;
-    init: (options?: {
-      storeKeysGlobally?: boolean;
-      force?: boolean;
-    }) => Promise<InitResult>;
-  };
+  ) => LLMAPI;
 };
 
 // Options for controlling completion behavior

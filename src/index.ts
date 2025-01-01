@@ -1,7 +1,7 @@
 import { InvalidProviderError, UnknownModelError } from "./errors.js";
 import * as anthropic from "./providers/anthropic/api.js";
 import * as openai from "./providers/openai/api.js";
-import { LLMProvider } from "./types.js";
+import { LLMAPI, LLMProvider } from "./types.js";
 
 export * as errors from "./errors.js";
 export * as parsing from "./responseParsing/index.js";
@@ -22,11 +22,11 @@ export function getProviders(): LLMProvider[] {
   return providers;
 }
 
-export async function getProviderForModel(
+export async function getAPIForModel(
   model: string,
   configDir: string,
   globalConfigDir?: string
-): Promise<LLMProvider> {
+): Promise<LLMAPI> {
   // Get all provider APIs
   const providers = getProviders();
 
@@ -37,7 +37,7 @@ export async function getProviderForModel(
 
     // If we find the model in this provider's models, return the provider name
     if (models.find((m) => m.key === model)) {
-      return provider;
+      return api;
     }
   }
 
