@@ -78,7 +78,7 @@ export type InitResult = {
   skipped: string[];
 };
 
-export type LLMAPI = {
+export type LLMProvider = {
   completion: CompletionFunc;
   getModels: () => Promise<ModelDescription[]>;
   init: (options?: {
