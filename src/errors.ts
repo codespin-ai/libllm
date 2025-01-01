@@ -45,3 +45,9 @@ export class InvalidProviderError extends ProviderError {
     super(`Invalid provider: ${name}`);
   }
 }
+
+export class UnknownModelError extends ProviderError {
+  constructor(model: string) {
+    super(`Could not find a provider for the model ${model}`);
+  }
+}
