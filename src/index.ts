@@ -5,6 +5,7 @@ import { LLMProvider, Logger } from "./types.js";
 
 export * as types from "./types.js";
 export * as parsing from "./responseParsing/index.js";
+export * as errors from "./errors.js";
 
 export function getAPI(
   name: string,
