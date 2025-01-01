@@ -4,26 +4,22 @@ export const defaultConfig: OpenAIConfig = {
   apiKey: "",
   models: [
     {
-      key: "gpt-4o",
-      provider: "openai",
+      name: "gpt-4o",
       maxInputTokens: 128000,
       maxOutputTokens: 16384,
     },
     {
-      key: "gpt-4o-mini",
-      provider: "openai",
+      name: "gpt-4o-mini",
       maxInputTokens: 128000,
       maxOutputTokens: 16384,
     },
     {
-      key: "o1",
-      provider: "openai",
+      name: "o1",
       maxInputTokens: 200000,
       maxOutputTokens: 100000,
     },
     {
-      key: "o1-mini",
-      provider: "openai",
+      name: "o1-mini",
       maxInputTokens: 128000,
       maxOutputTokens: 65536,
     },

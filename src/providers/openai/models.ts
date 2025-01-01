@@ -20,8 +20,7 @@ export function mapToModelDescription(
 ): ModelDescription {
   return {
     key: settings.key,
-    name: model.key,
-    provider: model.provider,
+    name: model.name,
     maxOutputTokens: model.maxOutputTokens,
     description: settings.description,
   };

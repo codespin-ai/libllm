@@ -127,7 +127,7 @@ export function getAPI(
   async function getModels(): Promise<ModelDescription[]> {
     const config = await loadConfig(configDir, globalConfigDir);
     return config.modelSettings.map((settings) => {
-      const model = config.models.find((m) => m.key === settings.modelKey);
+      const model = config.models.find((m) => m.name === settings.modelKey);
       if (!model) {
         throw new Error(`Model not found for key: ${settings.modelKey}`);
       }
@@ -157,7 +157,7 @@ export function getAPI(
       throw new Error(`Model settings not found for key: ${options.model}`);
     }
 
-    const model = config.models.find((m) => m.key === settings.modelKey);
+    const model = config.models.find((m) => m.name === settings.modelKey);
     if (!model) {
       throw new Error(`Model not found for key: ${settings.modelKey}`);
     }
@@ -178,7 +178,7 @@ export function getAPI(
 
     try {
       const stream = await anthropicClient.messages.stream({
-        model: model.key,
+        model: model.name,
         max_tokens: options.maxTokens ?? model.maxOutputTokens,
         messages: sdkMessages,
         temperature: settings.temperature,

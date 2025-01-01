@@ -1,6 +1,5 @@
 export type BaseModel = {
-  key: string;
-  provider: string;
+  name: string;
   maxInputTokens: number;
   maxOutputTokens: number;
 };

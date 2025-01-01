@@ -53,8 +53,7 @@ export type StreamingFileParseResult =
 // Describes an LLM model's capabilities and constraints
 export type ModelDescription = {
   key: string; // Unique identifier for this configuration
-  name?: string; // Model identifier (e.g. "gpt-4")
-  provider: string; // LLM provider ("openai" or "anthropic")
+  name: string; // Model identifier (e.g. "gpt-4")
   maxOutputTokens: number; // Maximum allowed response length
   description?: string; // Description of the model's capabilities
 };

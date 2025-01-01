@@ -1,18 +1,21 @@
 import { readFile } from "fs/promises";
-import path from "path";
 import OpenAI, {
   AuthenticationError as OpenAIAuthenticationError,
 } from "openai";
+import path from "path";
+import { InvalidCredentialsError } from "../../errors.js";
+import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
+import { calculateApproxTokenUsage } from "../../tokens/tokenCounting.js";
 import {
-  CompletionInputMessage,
   CompletionContentPart,
+  CompletionInputMessage,
   CompletionOptions,
   CompletionResult,
-  ModelDescription,
   Logger,
+  ModelDescription,
 } from "../../types.js";
-import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
-import { InvalidCredentialsError } from "../../errors.js";
+import { initializeConfig } from "../initHelper.js";
+import { CachedConfig } from "../types.js";
 import { defaultConfig } from "./defaultConfig.js";
 import {
   OpenAIConfig,
@@ -20,10 +23,6 @@ import {
   OpenAIModelSettings,
   mapToModelDescription,
 } from "./models.js";
-import { CachedConfig } from "../types.js";
-import { initializeConfig } from "../initHelper.js";
-import { calculateApproxTokenUsage } from "../../tokens/tokenCounting.js";
-import { getProvider } from "../../index.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
@@ -140,7 +139,7 @@ export function getAPI(
   async function getModels(): Promise<ModelDescription[]> {
     const config = await loadConfig(configDir, globalConfigDir);
     return config.modelSettings.map((settings) => {
-      const model = config.models.find((m) => m.key === settings.modelKey);
+      const model = config.models.find((m) => m.name === settings.modelKey);
       if (!model) {
         throw new Error(`Model not found for key: ${settings.modelKey}`);
       }
@@ -170,7 +169,7 @@ export function getAPI(
       throw new Error(`Model settings not found for key: ${options.model}`);
     }
 
-    const model = config.models.find((m) => m.key === settings.modelKey);
+    const model = config.models.find((m) => m.name === settings.modelKey);
     if (!model) {
       throw new Error(`Model not found for key: ${settings.modelKey}`);
     }
@@ -190,7 +189,7 @@ export function getAPI(
 
     try {
       const stream = await openaiClient.chat.completions.create({
-        model: model.key,
+        model: model.name,
         messages: transformedMessages,
         max_tokens: maxTokens,
         temperature: settings.temperature,
