@@ -3,9 +3,7 @@ import Anthropic, {
 } from "@anthropic-ai/sdk";
 import { readFile } from "fs/promises";
 import path from "path";
-import {
-  InvalidCredentialsError
-} from "../../errors.js";
+import { InvalidCredentialsError } from "../../errors.js";
 import { createStreamingFileParser } from "../../responseParsing/streamingFileParser.js";
 import {
   CompletionContentPart,
@@ -24,6 +22,7 @@ import {
   AnthropicModelSettings,
   mapToModelDescription,
 } from "./models.js";
+import { calculateApproxTokenUsage } from "../../tokens/tokenCounting.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
@@ -222,10 +221,28 @@ export function getAPI(
     logger?.writeDebug("---ANTHROPIC RESPONSE---");
     logger?.writeDebug(responseText);
 
+    // Calculate token usage if not disabled
+    let usage = undefined;
+    if (options.tokenCounting !== "disabled") {
+      const inputText = sdkMessages
+        .map((msg) =>
+          typeof msg.content === "string"
+            ? msg.content
+            : JSON.stringify(msg.content)
+        )
+        .join("\n");
+
+      usage = calculateApproxTokenUsage(inputText, responseText);
+
+      logger?.writeDebug("---TOKEN USAGE---");
+      logger?.writeDebug(JSON.stringify(usage, null, 2));
+    }
+
     return {
       message: responseText,
       finishReason:
         fullMessage.stop_reason === "max_tokens" ? "MAX_TOKENS" : "STOP",
+      usage,
     };
   }
 

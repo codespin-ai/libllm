@@ -84,7 +84,7 @@ export type LLMAPI = {
   init: (options?: {
     storeKeysGlobally?: boolean;
     force?: boolean;
-  }) => Promise<InitResult>
+  }) => Promise<InitResult>;
 };
 
 // Options for controlling completion behavior
@@ -95,12 +95,17 @@ export type CompletionOptions = {
   cancelCallback?: (cancel: () => void) => void;
   responseStreamCallback?: (data: string) => void;
   fileResultStreamCallback?: (data: StreamingFileParseResult) => void;
+  tokenCounting?: "approx" | "disabled";
 };
 
 // Result of a completion request
 export type CompletionResult = {
   message: string;
   finishReason: "STOP" | "MAX_TOKENS"; // Why generation ended
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+  };
 };
 
 // Parser Types

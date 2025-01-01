@@ -22,6 +22,7 @@ import {
 } from "./models.js";
 import { CachedConfig } from "../types.js";
 import { initializeConfig } from "../initHelper.js";
+import { calculateApproxTokenUsage } from "../../tokens/tokenCounting.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
@@ -233,9 +234,27 @@ export function getAPI(
     logger?.writeDebug("---OPENAI RESPONSE---");
     logger?.writeDebug(responseText);
 
+    // Calculate token usage if not disabled
+    let usage = undefined;
+    if (options.tokenCounting !== "disabled") {
+      const inputText = transformedMessages
+        .map((msg) =>
+          typeof msg.content === "string"
+            ? msg.content
+            : JSON.stringify(msg.content)
+        )
+        .join("\n");
+
+      usage = calculateApproxTokenUsage(inputText, responseText);
+
+      logger?.writeDebug("---TOKEN USAGE---");
+      logger?.writeDebug(JSON.stringify(usage, null, 2));
+    }
+
     return {
       message: responseText,
       finishReason: finishReason === "length" ? "MAX_TOKENS" : "STOP",
+      usage,
     };
   }
 
