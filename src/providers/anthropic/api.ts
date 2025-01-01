@@ -251,5 +251,5 @@ export function getAPI(
     };
   }
 
-  return { completion, getModels, init };
+  return { completion, getModels, init, getProviderName: getName };
 }

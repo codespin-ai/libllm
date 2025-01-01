@@ -23,6 +23,7 @@ import {
 import { CachedConfig } from "../types.js";
 import { initializeConfig } from "../initHelper.js";
 import { calculateApproxTokenUsage } from "../../tokens/tokenCounting.js";
+import { getProvider } from "../../index.js";
 
 const FILE_PATH_PREFIX = "File path:";
 
@@ -263,5 +264,5 @@ export function getAPI(
     };
   }
 
-  return { completion, getModels, init };
+  return { completion, getModels, init, getProviderName: getName };
 }

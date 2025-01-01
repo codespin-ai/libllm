@@ -79,6 +79,7 @@ export type InitResult = {
 };
 
 export type LLMAPI = {
+  getProviderName: () => string;
   completion: CompletionFunc;
   getModels: () => Promise<ModelDescription[]>;
   init: (options?: {
