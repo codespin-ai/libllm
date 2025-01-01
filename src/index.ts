@@ -5,6 +5,7 @@ import { LLMAPI as LLMProvider, Logger } from "./types.js";
 export { AnthropicConfig } from "./providers/anthropic/models.js";
 export { OpenAIConfig } from "./providers/openai/models.js";
 export { extractFromMarkdownCodeBlock } from "./responseParsing/codeBlocks.js";
+export { jsonParser } from "./responseParsing/jsonParser.js";
 export { fileBlockParser } from "./responseParsing/fileBlockParser.js";
 export { createStreamingFileParser } from "./responseParsing/streamingFileParser.js";
 export * from "./types.js";
