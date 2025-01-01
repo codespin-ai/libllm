@@ -1,42 +1,38 @@
 import { InvalidProviderError } from "./errors.js";
 import * as anthropic from "./providers/anthropic/api.js";
-import * as openAI from "./providers/openai/api.js";
-import { LLMProvider, Logger } from "./types.js";
+import * as openai from "./providers/openai/api.js";
+import { LLMProvider } from "./types.js";
 
-export * as types from "./types.js";
-export * as parsing from "./responseParsing/index.js";
 export * as errors from "./errors.js";
+export * as parsing from "./responseParsing/index.js";
+export * as types from "./types.js";
 
-export function getAPI(
-  name: string,
-  configDir: string,
-  globalConfigDir?: string,
-  logger?: Logger
-): LLMProvider {
+export function getProvider(name: string): LLMProvider {
   if (name === "openai") {
-    return openAI.getAPI(configDir, globalConfigDir, logger);
+    return openai;
   } else if (name === "anthropic") {
-    return anthropic.getAPI(configDir, globalConfigDir, logger);
+    return anthropic;
   } else {
     throw new InvalidProviderError(name);
   }
 }
 
-export async function getProviders() {
-  return ["openai", "anthropic"];
+export function getProviders(): { [name: string]: LLMProvider } {
+  return { openai, anthropic };
 }
 
 export async function getProviderForModel(
   model: string,
   configDir: string,
   globalConfigDir?: string
-): Promise<string | undefined> {
+): Promise<LLMProvider | undefined> {
   // Get all provider APIs
-  const providers = await getProviders();
+  const providers = getProviders();
 
   // Check each provider's models
-  for (const provider of providers) {
-    const api = getAPI(provider, configDir, globalConfigDir);
+  for (const providerName of Object.keys(providers)) {
+    const provider = providers[providerName];
+    const api = provider.getAPI(configDir, globalConfigDir);
     const models = await api.getModels();
 
     // If we find the model in this provider's models, return the provider name
@@ -57,7 +53,7 @@ export async function reloadConfig(
     // Reload specific provider
     switch (provider) {
       case "openai":
-        await openAI.reloadConfig(configDir, globalConfigDir);
+        await openai.reloadConfig(configDir, globalConfigDir);
         break;
       case "anthropic":
         await anthropic.reloadConfig(configDir, globalConfigDir);
@@ -68,7 +64,7 @@ export async function reloadConfig(
   } else {
     // Reload all providers
     await Promise.all([
-      openAI.reloadConfig(configDir, globalConfigDir),
+      openai.reloadConfig(configDir, globalConfigDir),
       anthropic.reloadConfig(configDir, globalConfigDir),
     ]);
   }
