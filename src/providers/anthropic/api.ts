@@ -95,12 +95,16 @@ async function loadConfig(
   return config;
 }
 
+export function getName() {
+  return "anthropic";
+}
+
 export async function reloadConfig(
   configDir: string,
   globalConfigDir?: string
-): Promise<void> {
+): Promise<AnthropicConfig> {
   configCache = undefined;
-  await loadConfig(configDir, globalConfigDir);
+  return await loadConfig(configDir, globalConfigDir);
 }
 
 export function getAPI(
@@ -134,7 +138,7 @@ export function getAPI(
   async function completion(
     messages: CompletionInputMessage[],
     options: CompletionOptions,
-    reloadConfig?: boolean
+    reload?: boolean
   ): Promise<CompletionResult> {
     const config = await loadConfig(configDir, globalConfigDir);
     const apiKey = process.env.ANTHROPIC_API_KEY ?? config.apiKey;
@@ -143,7 +147,8 @@ export function getAPI(
       throw new InvalidCredentialsError("ANTHROPIC");
     }
 
-    if (!anthropicClient || reloadConfig) {
+    if (!anthropicClient || reload) {
+      await reloadConfig(configDir, globalConfigDir);
       anthropicClient = new Anthropic({ apiKey });
     }
 

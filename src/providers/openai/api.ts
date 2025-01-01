@@ -107,6 +107,10 @@ async function loadConfig(
   return config;
 }
 
+export function getName() {
+  return "openai";
+}
+
 export async function reloadConfig(
   configDir: string,
   globalConfigDir?: string
@@ -146,7 +150,7 @@ export function getAPI(
   async function completion(
     messages: CompletionInputMessage[],
     options: CompletionOptions,
-    reloadConfig?: boolean
+    reload?: boolean
   ): Promise<CompletionResult> {
     const config = await loadConfig(configDir, globalConfigDir);
     const apiKey = process.env.OPENAI_API_KEY ?? config.apiKey;
@@ -155,7 +159,8 @@ export function getAPI(
       throw new InvalidCredentialsError("OPENAI");
     }
 
-    if (!openaiClient || reloadConfig) {
+    if (!openaiClient || reload) {
+      reloadConfig(configDir, globalConfigDir);
       openaiClient = new OpenAI({ apiKey });
     }
 

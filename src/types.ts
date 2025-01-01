@@ -69,7 +69,7 @@ export type ConfigLoaders = {
 export type CompletionFunc = (
   messages: CompletionInputMessage[],
   options: CompletionOptions,
-  reloadConfig?: boolean
+  reload?: boolean
 ) => Promise<CompletionResult>;
 
 // Interface implemented by LLM providers
@@ -79,6 +79,7 @@ export type InitResult = {
 };
 
 export type LLMProvider = {
+  getName: () => string;
   getAPI: (
     configDir: string,
     globalConfigDir?: string,
