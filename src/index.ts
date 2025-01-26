@@ -1,13 +1,14 @@
 import { InvalidProviderError, UnknownModelError } from "./errors.js";
 import * as anthropic from "./providers/anthropic/api.js";
 import * as openai from "./providers/openai/api.js";
+import * as deepseek from "./providers/deepseek/api.js";
 import { LLMAPI, LLMProvider } from "./types.js";
 
 export * as errors from "./errors.js";
 export * as parsing from "./responseParsing/index.js";
 export * as types from "./types.js";
 
-const providers: LLMProvider[] = [openai, anthropic];
+const providers: LLMProvider[] = [openai, anthropic, deepseek];
 
 export function getProvider(name: string): LLMProvider {
   const provider = providers.find((x) => x.getName() === name);
